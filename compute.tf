@@ -1,15 +1,15 @@
 # Create an EC2 instance in the public subnet
-resource "aws_instance" "tf_practice_server" {
+resource "aws_instance" "public_server" {
   # Amazon Linux 2023
   ami           = "ami-0ccabb5f82d4c9af5"
   instance_type = "t2.micro"
-  subnet_id = aws_subnet.tf_practice_public_subnet.id
+  subnet_id = aws_subnet.my_public_subnet.id
   associate_public_ip_address = true
-  vpc_security_group_ids = [aws_security_group.tf_practice_sg.id]
-  key_name = var.AWS_key_pair_name # Defined in private_variables.tf, not included in git
+  vpc_security_group_ids = [aws_security_group.my_public_sg.id]
+  key_name = var.AWS_key_pair_name # Defined in private_vars.tf, not included in git
 
   tags = {
-    Name = "tf_practice_server"
+    Name  = format("%s_%s", var.AWS_project_name, "public_server")
   }
 
   # Install a web server on startup to demonstrate basic functionality
@@ -17,11 +17,16 @@ resource "aws_instance" "tf_practice_server" {
 
 }
 
-# Provide information about our server's public IP address
-output "tf_practice_server_IP" {
-    value = "${aws_instance.tf_practice_server.public_ip}"
+# Provide information about server's public IP address
+output "public_server_IP" {
+  value = "${
+    formatlist(
+        "%s",
+        aws_instance.public_server.public_ip
+        # Not desired formatting, but could can extend
+        # "%s:%s",
+        # aws_instance.public_server.tags.Name,
+        # aws_instance.public_server.public_ip
+    )
+  }"
 }
-
-# ssh access is now possible with a fun one-liner like
-# ssh -i $KEYPATH ec2-user@$(terraform output tf_practice_server_IP | tr -d '"')
-# where $KEYPATH is a bash environmental variable storing the PEM key corresponding to 'macbook-air'

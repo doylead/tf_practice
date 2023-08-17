@@ -3,4 +3,4 @@
 .terraform.lock.hcl/
 .terraform/
 .terraform.lock.hcl
-private_variables.tf
+private_vars.tf
